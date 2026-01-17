@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700&display=swap" rel="stylesheet">
+    <script>tailwind.config = { darkMode: 'class' }</script>
+    <style>body{font-family:'Plus Jakarta Sans',sans-serif;}</style>
+    
+<script>
+    if (localStorage.theme === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+        document.documentElement.classList.add('dark');
+    } else {
+        document.documentElement.classList.remove('dark');
+    }
+</script>
+<style>
+    body, div, aside, header, main, table { transition: background-color 0.3s, border-color 0.3s, color 0.3s; }
+</style>
+
+</head>
+<body class="bg-[#F6F8FA] dark:bg-slate-900 text-slate-800 dark:text-slate-100 min-h-screen flex">
+    
+<aside class="w-64 border-r border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 hidden md:flex flex-col p-6 fixed h-full z-10">
+    <div class="flex items-center gap-3 mb-10 px-2">
+        <div class="w-8 h-8 bg-indigo-600 rounded-lg flex items-center justify-center text-white"><i data-lucide="zap" class="w-5 h-5"></i></div>
+        <span class="font-bold text-lg tracking-tight dark:text-white">TaskTracker</span>
+    </div>
+    <div class="space-y-1 flex-1">
+        <a href="/dashboard" class="flex items-center gap-3 px-4 py-3 hover:bg-slate-50 dark:hover:bg-slate-700 rounded-xl font-medium text-slate-600 dark:text-slate-300 hover:text-indigo-600 dark:hover:text-indigo-400 transition"><i data-lucide="layout-grid" class="w-5 h-5"></i> Dashboard</a>
+        <a href="/schedule" class="flex items-center gap-3 px-4 py-3 hover:bg-slate-50 dark:hover:bg-slate-700 rounded-xl font-medium text-slate-600 dark:text-slate-300 hover:text-indigo-600 dark:hover:text-indigo-400 transition"><i data-lucide="calendar" class="w-5 h-5"></i> Schedule</a>
+        <a href="/settings" class="flex items-center gap-3 px-4 py-3 hover:bg-slate-50 dark:hover:bg-slate-700 rounded-xl font-medium text-slate-600 dark:text-slate-300 hover:text-indigo-600 dark:hover:text-indigo-400 transition"><i data-lucide="settings" class="w-5 h-5"></i> Settings</a>
+    </div>
+    <div class="pt-6 border-t border-slate-100 dark:border-slate-700">
+        <div class="flex items-center gap-3 px-2">
+            <div class="w-10 h-10 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold">{{ user.email[0]|upper }}</div>
+            <div class="overflow-hidden"><p class="text-sm font-bold truncate dark:text-slate-200">{{ user.email }}</p><a href="/logout" class="text-xs text-red-500">Log out</a></div>
+        </div>
+    </div>
+</aside>
+
+    <main class="flex-1 md:ml-64 p-8 max-w-7xl mx-auto w-full">
+        <header class="flex justify-between items-center mb-8">
+            <h1 class="text-2xl font-bold">Dashboard</h1>
+            <button onclick="document.getElementById('modal').classList.remove('hidden')" class="bg-indigo-600 text-white px-5 py-2.5 rounded-xl font-bold hover:bg-indigo-700 transition flex gap-2"><i data-lucide="plus" class="w-5 h-5"></i> New Task</button>
+        </header>
+
+        <div class="grid grid-cols-4 gap-4 mb-8">
+            <div class="bg-white dark:bg-slate-800 p-5 rounded-2xl border border-slate-100 dark:border-slate-700"><p class="text-xs font-bold text-slate-400 uppercase">Total</p><p class="text-2xl font-bold">{{ stats.total }}</p></div>
+            <div class="bg-white dark:bg-slate-800 p-5 rounded-2xl border border-slate-100 dark:border-slate-700"><p class="text-xs font-bold text-amber-500 uppercase">Pending</p><p class="text-2xl font-bold">{{ stats.pending }}</p></div>
+            <div class="bg-white dark:bg-slate-800 p-5 rounded-2xl border border-slate-100 dark:border-slate-700"><p class="text-xs font-bold text-emerald-500 uppercase">Done</p><p class="text-2xl font-bold">{{ stats.completed }}</p></div>
+            <div class="bg-indigo-600 p-5 rounded-2xl text-white"><p class="text-xs font-bold text-indigo-200 uppercase">Rate</p><p class="text-2xl font-bold">{{ stats.completion_rate }}%</p></div>
+        </div>
+        
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <div class="lg:col-span-2 bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 overflow-hidden">
+                <div class="p-4 border-b border-slate-100 dark:border-slate-700 bg-slate-50/50 dark:bg-slate-800"><h3 class="font-bold text-slate-700 dark:text-slate-200">Recent Tasks</h3></div>
+                <div class="divide-y divide-slate-100 dark:divide-slate-700">
+                    {% for task in tasks %}
+                    <div class="p-4 flex justify-between items-center hover:bg-slate-50 dark:hover:bg-slate-750 transition">
+                        <div>
+                            <p class="font-semibold {{'line-through text-slate-400' if task.status == 'Completed' else 'text-slate-800 dark:text-slate-100'}}">{{ task.title }}</p>
+                            <p class="text-xs text-slate-400">{{ task.due_date.strftime('%Y-%m-%d') }}</p>
+                        </div>
+                        <div class="flex gap-2">
+                            {% if task.status != 'Completed' %}<a href="/tasks/complete/{{ task.id }}" class="p-2 bg-emerald-50 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400 rounded-lg"><i data-lucide="check" class="w-4 h-4"></i></a>{% endif %}
+                            <a href="/tasks/delete/{{ task.id }}" class="p-2 text-slate-300 hover:text-red-500"><i data-lucide="trash-2" class="w-4 h-4"></i></a>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <div class="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 p-6 h-fit">
+                <h3 class="font-bold text-slate-700 dark:text-slate-200 mb-4 flex items-center gap-2"><i data-lucide="calendar-clock" class="w-4 h-4 text-indigo-500"></i> Upcoming</h3>
+                {% if upcoming %}
+                    <div class="space-y-4">
+                        {% for task in upcoming %}
+                        <div class="p-3 rounded-xl bg-slate-50 dark:bg-slate-700/50 border border-slate-100 dark:border-slate-700">
+                            <p class="font-semibold text-sm dark:text-slate-200">{{ task.title }}</p>
+                            <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">Due: {{ task.due_date.strftime('%b %d') }}</p>
+                        </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <p class="text-sm text-slate-400">No upcoming tasks soon.</p>
+                {% endif %}
+                <a href="/schedule" class="block mt-4 text-center text-sm font-bold text-indigo-600 dark:text-indigo-400 hover:underline">View Schedule</a>
+            </div>
+        </div>
+    </main>
+
+    <div id="modal" class="hidden fixed inset-0 bg-slate-900/60 flex items-center justify-center z-50 p-4">
+        <form action="/tasks/add" method="POST" class="bg-white dark:bg-slate-800 rounded-3xl p-8 w-full max-w-md shadow-2xl relative">
+            <button type="button" onclick="document.getElementById('modal').classList.add('hidden')" class="absolute top-4 right-4 text-slate-400"><i data-lucide="x"></i></button>
+            <h2 class="text-xl font-bold mb-6 dark:text-white">Create Task</h2>
+            <input name="title" placeholder="What needs doing?" required class="w-full p-3 bg-slate-50 dark:bg-slate-700 rounded-xl mb-4 border-none outline-none ring-1 ring-slate-200 dark:ring-slate-600 focus:ring-indigo-500 dark:text-white">
+            <input name="due_date" type="date" required class="w-full p-3 bg-slate-50 dark:bg-slate-700 rounded-xl mb-6 border-none outline-none ring-1 ring-slate-200 dark:ring-slate-600 focus:ring-indigo-500 dark:text-white">
+            <button class="w-full py-3 bg-indigo-600 text-white font-bold rounded-xl hover:bg-indigo-700">Add Task</button>
+        </form>
+    </div>
+    <script>lucide.createIcons();</script>
+</body>
+</html>
