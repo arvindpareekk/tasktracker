@@ -1,8 +1,9 @@
+import os
 import smtplib
 from email.message import EmailMessage
 
-EMAIL_ADDRESS = "2022pceadarvind013@poornima.org"
-EMAIL_PASSWORD = "opxx cord oets jsnj"
+EMAIL_ADDRESS = os.getenv("EMAIL_ADDRESS")
+EMAIL_PASSWORD = os.getenv("EMAIL_PASSWORD")
 
 
 def send_otp_email(to_email: str, otp: str):
