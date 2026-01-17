@@ -17,7 +17,10 @@ models.Base.metadata.create_all(bind=database.engine)
 
 app = FastAPI()
 
-templates = Jinja2Templates(directory="frontend")
+templates = Jinja2Templates(
+    directory="frontend",
+    auto_reload=True
+)
 app.mount("/static", StaticFiles(directory="frontend"), name="static")
 
 # ---------------- OTP HELPERS ---------------- #
