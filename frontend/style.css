@@ -1,0 +1,13 @@
+body {
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+  background: #0f172a;
+  color: white;
+}
+
+.container {
+  max-width: 400px;
+  margin: 80px auto;
+  padding: 24px;
+  background: rgba(255,255,255,0.08);
+  border-radius: 16px;
+}
